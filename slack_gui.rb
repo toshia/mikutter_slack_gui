@@ -73,6 +73,20 @@ Plugin.create(:slack_gui) do
     StringIO.new(res.body)
   end
 
+  command(:slack_gui_open_team,
+          name: 'チームの詳細を開く',
+          condition: lambda{ |opt|
+            world, = Plugin.filtering(:world_current, nil)
+            world.class.slug == :slack
+          },
+          visible: true,
+          role: :window) do |opt|
+    world, = Plugin.filtering(:world_current, nil)
+    if world.class.slug == :slack
+      Plugin.call(:open, world.team)
+    end
+  end
+
   # コマンド登録
   # コマンドのslugはpost_to_slack_#{チーム名}_#{チャンネル名}の予定
   command(:post_to_slack,
