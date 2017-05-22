@@ -15,6 +15,21 @@ Plugin.create(:slack_gui) do
   # Activity の設定
   defactivity 'slack_connection', 'Slack接続情報'
 
+  intent :slack_team, label: 'Slackチームを開く' do |intent_token|
+    team = intent_token.model
+    timeline_slug = :"slack_channels_of_#{team.domain}"
+    tab(:"slack_team_#{team.domain}", team.title) do
+      temporary_tab
+      set_deletable true
+      timeline timeline_slug
+      team.channels.next{|channels|
+        timeline(timeline_slug) << channels
+      }.trap{|err|
+        error err
+      }
+    end
+  end
+
   intent :slack_channel, label: 'Slack Channelを開く' do |intent_token|
     channel = intent_token.model
     tab_slug = :"slack_temporary_channel_tab_#{channel.id}"
